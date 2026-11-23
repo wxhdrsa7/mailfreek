@@ -5,6 +5,7 @@
 
 import { cacheGet, cacheSet, setCurrentUserKey, getCurrentUserKey } from './storage.js';
 import { openForwardDialog, toggleFavorite, injectDialogStyles } from './mailbox-settings.js';
+import IconHelper from './modules/icons.js';
 
 // 导入模块
 import { formatTs, formatTsMobile, extractCode, escapeHtml, escapeAttr } from './modules/app/ui-helpers.js';
@@ -18,7 +19,7 @@ import { initSessionFromCache, validateSession, isGuest, isAdmin, applySessionUI
 import { loadDomains, getStoredLength, saveLength, updateRangeProgress, getSelectedDomainIndex, populateDomains, STORAGE_KEYS } from './modules/app/domains.js';
 import { initCompose, showSentEmailDetail } from './modules/app/compose.js';
 import { showEmailDetail, deleteEmailById, deleteSentById, copyFromEmailList, prefetchEmails } from './modules/app/email-viewer.js';
-import { generateMailbox, generateNameMailbox, createCustomMailbox, updateEmailDisplay, selectMailboxAddress, toggleMailboxPin, deleteMailboxAddress, copyMailboxAddress, clearAllEmails, logout } from './modules/app/mailbox-actions.js';
+import { generateMailbox, generateNameMailbox, createCustomMailbox, updateEmailDisplay, selectMailboxAddress, toggleMailboxPin, deleteMailboxAddress, copyMailboxAddress, clearAllEmails, logout, resetMailboxDisplay } from './modules/app/mailbox-actions.js';
 
 // 全局状态
 window.__GUEST_MODE__ = false;
@@ -84,6 +85,21 @@ function showHeaderLoading(t) { if (els.listLoading) { els.listLoading.innerHTML
 function hideHeaderLoading() { if (els.listLoading) els.listLoading.style.display = 'none'; }
 function showCountdown() { if (els.listLoading) { els.listLoading.innerHTML = `<span class="countdown-icon">⏱</span>${countdown}s 后刷新`; els.listLoading.style.display = 'flex'; }}
 
+// 当前邮箱已被删除（例如管理员删除后访客端仍在轮询）：清空选中态，回到「未选邮箱」状态
+function handleMailboxGone(address) {
+  if (getCurrentMailbox() !== address) return;
+  clearCurrentMailbox();
+  setCurrentMailboxInfo(null);
+  stopAutoRefresh();
+  try { resetMailboxDisplay(els); } catch(_) {}
+  if (els.favoriteIcon && els.favoriteText) {
+    try { els.favoriteIcon.innerHTML = IconHelper.star(18, 18, false); } catch(_) {}
+    els.favoriteText.textContent = '收藏邮箱';
+  }
+  showToast('该邮箱已被管理员删除，请重新生成', 'warn');
+  loadMailboxes({ forceFresh: true });
+}
+
 // 刷新邮件列表
 async function refresh() {
   const mailbox = getCurrentMailbox();
@@ -94,8 +110,23 @@ async function refresh() {
     const url = !isSentViewActive() ? `/api/emails?mailbox=${encodeURIComponent(mailbox)}` : `/api/sent?from=${encodeURIComponent(mailbox)}`;
     const ctrl = new AbortController(); const timeout = setTimeout(() => ctrl.abort(), 8000);
     let emails = [];
-    try { const r = await api(url, { signal: ctrl.signal }); emails = await r.json(); } finally { clearTimeout(timeout); }
-    if (!Array.isArray(emails) || !emails.length) { els.list.innerHTML = '<div style="text-align:center;color:#64748b">📭 暂无邮件</div>'; if (els.pager) els.pager.style.display = 'none'; return; }
+    let mailboxMissing = false;
+    try {
+      const r = await api(url, { signal: ctrl.signal });
+      mailboxMissing = r.headers.get('X-Mailbox-Missing') === '1';
+      emails = await r.json();
+    } finally { clearTimeout(timeout); }
+    if (mailboxMissing) { handleMailboxGone(mailbox); return; }
+    if (!Array.isArray(emails) || !emails.length) {
+      els.list.innerHTML = `<div class="empty-state">
+        <svg class="empty-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <use href="/icons/sprites.svg#icon-inbox"/>
+        </svg>
+        <span class="empty-text">暂无邮件</span>
+      </div>`;
+      if (els.pager) els.pager.style.display = 'none';
+      return;
+    }
     const isMobile = window.matchMedia?.('(max-width: 900px)').matches;
     els.list.innerHTML = sliceByPage(emails, els).map(e => renderEmailItem(e, isMobile)).join('');
     if (!isSentViewActive()) prefetchEmails(emails, api);
@@ -122,10 +153,16 @@ async function loadMailboxes(opts = {}) {
   finally { setLoading(false); if (els.mbLoading) els.mbLoading.style.display = 'none'; }
 }
 
-function updateMailboxInfoUI(info) { if (!info) return; if (els.favoriteIcon && els.favoriteText) { els.favoriteIcon.textContent = info.is_favorite ? '⭐' : '☆'; els.favoriteText.textContent = info.is_favorite ? '已收藏' : '收藏'; }}
+function updateMailboxInfoUI(info) {
+  if (!info) return;
+  if (els.favoriteIcon && els.favoriteText) {
+    els.favoriteIcon.innerHTML = IconHelper.star(18, 18, info.is_favorite);
+    els.favoriteText.textContent = info.is_favorite ? '已收藏' : '收藏邮箱';
+  }
+}
 
 // 全局函数
-window.selectMailbox = (addr) => selectMailboxAddress(addr, els, api, refresh, autoRefreshCallback, updateMailboxInfoUI);
+window.selectMailbox = (addr) => selectMailboxAddress(addr, els, api, refresh, autoRefreshCallback, updateMailboxInfoUI, showToast);
 window.togglePin = (e, addr) => toggleMailboxPin(e, addr, api, showToast, loadMailboxes);
 window.deleteMailbox = (e, addr) => deleteMailboxAddress(e, addr, els, api, showToast, showConfirm, loadMailboxes);
 window.showEmail = (id) => showEmailDetail(id, els, api, showToast);

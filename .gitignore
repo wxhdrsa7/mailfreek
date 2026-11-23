@@ -100,3 +100,12 @@ Thumbs.db
 /asset/bookmarks_2025_9_5.html
 
 eml
+task_plan.md
+test-eml.html
+.gitignore
+wrangler-github.toml
+.gitignore
+wrangler-dev.toml
+findings.md
+progress.md
+test_api.sh

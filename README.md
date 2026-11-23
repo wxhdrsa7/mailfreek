@@ -2,42 +2,32 @@
 
 [![Deploy to Cloudflare Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/idinging/freemail)
 
-一个基于 Cloudflare Workers + D1 + R2 构建的**开源临时邮箱服务**，支持邮件接收、发送、转发、用户管理等完整功能。
+🇨🇳 中文 | 🌐 [English](README_en.md)
 
-**当前版本：V4.8** - 新增单个邮件转发和收藏功能
+一个基于 Cloudflare Workers + D1 + R2 构建的前后端分离的**开源临时邮箱服务**，支持 RESTful API 调用，适配多渠道发件，支持邮件接收、发送、转发、用户管理等功能。
 
-`转发的地址需要在cloudflare Email Addresses中验证`
+**当前版本：V5.3.3** - 修复验证码误判与分组验证码提取 · 修复邮箱被删除后访客端界面残留
 
-📖 **[一键部署指南](docs/yijianbushu.md)** | 📬 **[Resend 发件配置](docs/resend.md)** | 📚 **[API 文档](docs/api.md)**
+`本邮箱服务支持接收邮件时自动创建对应的邮箱，邮箱服务的转发目标邮箱地址需要在cloudflare Email Addresses中验证`
+
+📖 **[一键部署指南](docs/yijianbushu.md)** | 🤖 **[Github Action 部署指南](docs/action-deployment.md)** | 📬 **[Resend 发件配置](docs/resend.md)** | 🚀 **[SendFlare 发件配置](docs/sendflare.md)** | ☁️ **[Cyberpersons 发件配置](docs/cyberpersons.md)** | 📚 **[API 文档](docs/api.md)** | 🌐 <u>[IPWO 住宅代理](https://www.ipwo.net/?ref=githubfreemail)</u>
 
 ## 📸 项目展示
-### 体验地址： https://mailexhibit.dinging.top/
+### 体验地址： https://freemail.cq.de5.net
 
 ### 体验账号： guest
-### 体验密码： admin
+### 体验密码： guest
 ### 页面展示
 
-#### 登陆
-![登陆页面](pic/dlu.png)
-#### 首页
-![首页展示](pic/shouye.png)
+| 首页 | 所有邮箱 |
+|------|----------|
+| ![首页展示](./pic/light/shouye.png) | ![所有邮箱](./pic/light/suoyouyouxiang.png) |
 
-### 手机端生成与历史
-<div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
-  <img src="./pic/phone/shouye.png" alt="手机端生成邮箱" style="height: 400px;" />
-  <img src="./pic/phone/lishi.png" alt="手机端历史邮箱" style="height: 400px;" />
-</div>
+| 用户管理 | 单个邮箱登录 |
+|----------|----------|
+| ![用户管理](./pic/light/yonghuguanli.png) | ![单个邮箱登录](./pic/dange邮箱登录.png) |
 
-### 单个邮箱页
-
-![单个邮箱首页](./pic/v4/youxiang.png)
-
-### 全部邮箱预览
-![单个邮箱首页](./pic/v4/xiugaiquanju.png)
-![单个邮箱首页](./pic/v4/liebiao.png)
-
-
-#### [更多展示点击查看](docs/zhanshi.md)
+[浅色模式展示](docs/zhanshi-light.md) | [深色模式展示](docs/zhanshi-dark.md)
 
 ## 功能特性
 
@@ -45,52 +35,21 @@
 |------|------|
 | 📧 **邮箱管理** | 随机生成临时邮箱 · 多域名支持 · 置顶/收藏 · 历史记录 · 邮箱搜索 |
 | 💌 **邮件功能** | 实时接收 · 自动刷新 · 验证码智能提取 · HTML/纯文本 · 邮件转发 |
-| ✉️ **发件支持** | Resend API 集成 · 多域名密钥 · 批量发送 · 定时发送 · 发件记录 |
-| 👥 **用户管理** | 三层权限模型 · 用户/邮箱分配 · 邮箱单点登录 · 登录权限控制 |
-| 🎨 **现代界面** | 毛玻璃效果 · 响应式设计 · 移动端适配 · 列表/卡片视图 |
+| ✉️ **发件支持** | 多渠道发件（Resend / SendFlare / Cyberpersons）· 按域名自动路由|
 | ⚡ **技术架构** | Cloudflare Workers · D1 数据库 · R2 存储 · Email Routing |
 
-> 💡 邮箱用户自行修改密码功能默认关闭，如需开启请将 `mailbox.html` 第 77-80 行取消注释。
 
 ## 版本历史
 
-<details>
-<summary><strong>V4.8</strong>（当前版本）- 邮件转发和收藏</summary>
-
-- 邮箱管理页面支持按转发/收藏状态筛选
-- 支持将指定邮箱转发到目标邮箱
-- 批量前缀转发可通过 `FORWARD_RULES` 环境变量配置
-</details>
-
-<details>
-<summary><strong>V4.5</strong> - 多域名发送配置</summary>
-
-- 支持为不同域名配置不同的 Resend API 密钥
-- 支持键值对、JSON、单密钥三种配置格式
-- 系统根据发件人域名自动选择 API 密钥
-</details>
-
-<details>
-<summary><strong>V4.0</strong> - 邮箱登录与全局管理</summary>
-
-- 支持邮箱地址单点登录
-- 全局邮箱管理功能，可限制单个邮箱登录
-- 邮箱搜索、随机人名生成、列表/卡片视图切换
-</details>
-
-<details>
-<summary><strong>V3.x</strong> - 用户管理与性能优化</summary>
-
-- V3.5：数据库查询优化、R2 存储完整 EML、移动端适配
-- V3.0：三层权限模型、用户管理后台、前端权限防护
-</details>
-
-<details>
-<summary><strong>V1.x ~ V2.x</strong> - 基础功能</summary>
-
-- V2.0：Resend 发件集成、邮箱置顶
-- V1.0：邮箱生成、邮件接收、验证码提取
-</details>
+| 版本 | 主要更新 |
+|------|----------|
+| **V5.3.3** | 修复验证码把邮箱地址/链接里的数字误判 · 支持分组写法验证码 · 修复邮箱被管理员删除后界面残留（[#75](https://github.com/idinging/freemail/pull/75) [#76](https://github.com/idinging/freemail/pull/76)） |
+| **V5.3.2** | 安全修复：禁止认领他人已占用的邮箱地址，堵住跨用户邮箱接管（[issue #73](https://github.com/idinging/freemail/issues/73)） |
+| **V5.3.1** | 新增 Cyberpersons（CyberPanel Email Delivery）发件渠道|
+| **V5.3.0** | 发件模块抽象为 `src/email/providers/` · 新增 SendFlare 渠道· 按发件人域名自动路由 · `sent_emails` 表新增 `provider` 字段 |
+| **V5.2.0** | 引入 postal-mime 改进邮件解析 · 修复部分客户端中文乱码问题 |
+| **V5.1.0** | 邮箱别名规范化支持扩展，支持 `.` `+` `-` 三种分隔符切分 |
+| **V1.0~v4.0** | 邮箱生成 · 邮件接收 · 验证码提取  · 用户管理后台 · R2 存储 EML |
 
 ## 部署配置
 
@@ -98,9 +57,46 @@
 
 1. **一键部署**：点击顶部按钮，按照 [部署指南](docs/yijianbushu.md) 完成配置
 2. **配置邮件路由**（收件必需）：域名 → Email Routing → Catch-all → 绑定 Worker
-3. **配置发件**（可选）：参考 [Resend 配置教程](docs/resend.md)
+3. **配置发件**（可选）：参考 [Resend 配置教程](docs/resend.md)、[SendFlare 配置教程](docs/sendflare.md) 或 [Cyberpersons 配置教程](docs/cyberpersons.md)，三者可同时启用
 
 > 使用 Git 集成部署时，请在 Workers → Settings → Variables 中手动配置环境变量
+
+### 本地运行
+
+本地运行适合调试前端页面、管理接口和发件逻辑。真实收信依赖 Cloudflare Email Routing，仍需要部署到 Cloudflare Workers 后才能完整验证。
+
+1. **安装依赖**
+
+```bash
+npm install
+```
+
+2. **配置本地变量**
+
+按需修改 `wrangler.toml` 中的 `[vars]`、D1 和 R2 绑定。至少建议设置：
+
+```toml
+ADMIN_NAME = "admin"
+ADMIN_PASSWORD = "your_admin_password"
+JWT_TOKEN = "your_random_jwt_secret"
+MAIL_DOMAIN = "example.com"
+```
+
+3. **初始化本地 D1 数据库**
+
+```bash
+npx wrangler d1 execute maill_free_db --local --file=./d1-init.sql
+```
+
+如果你修改了 `wrangler.toml` 中的 `database_name`，请把上面的 `maill_free_db` 替换为你的数据库名称。
+
+4. **启动本地开发服务**
+
+```bash
+npx wrangler dev
+```
+
+启动后访问 Wrangler 输出的本地地址即可。默认管理员账号为 `admin`，密码使用 `ADMIN_PASSWORD`。
 
 ### 环境变量
 
@@ -113,23 +109,49 @@
 | ADMIN_NAME | 严格管理员用户名（默认 `admin`） | 否 |
 | JWT_TOKEN | JWT 签名密钥 | 是 |
 | RESEND_API_KEY | Resend 发件密钥，支持多域名配置 | 否 |
+| SENDFLARE_API_KEY | SendFlare 发件密钥，格式同 Resend | 否 |
+| CYBERPERSONS_API_KEY | Cyberpersons 发件密钥，格式同 Resend | 否 |
 | FORWARD_RULES | 邮件转发规则 | 否 |
 
 <details>
-<summary><strong>RESEND_API_KEY 配置格式</strong></summary>
+<summary><strong>RESEND_API_KEY / SENDFLARE_API_KEY / CYBERPERSONS_API_KEY 配置格式</strong></summary>
+
+三个渠道密钥都支持相同的三种格式：
 
 ```bash
-# 单密钥（向后兼容）
+# 单密钥（通配所有发件域名）
 RESEND_API_KEY="re_xxxxxxxxxxxxxxxxxxxxxxxx"
+SENDFLARE_API_KEY="live_xxxxxxxxxxxxxxxxxxxxxxxx"
+CYBERPERSONS_API_KEY="sk_lera_xxxxxxxxxxxxxxxxxxxxxxxx"
 
-# 键值对格式（推荐）
+# 键值对格式（推荐，多域名独立计费 / 限额）
 RESEND_API_KEY="domain1.com=re_key1,domain2.com=re_key2"
+SENDFLARE_API_KEY="domain3.com=live_key3"
+CYBERPERSONS_API_KEY="domain4.com=sk_live_key4"
 
 # JSON格式
 RESEND_API_KEY='{"domain1.com":"re_key1","domain2.com":"re_key2"}'
 ```
 
-系统会根据发件人域名自动选择对应的 API 密钥。
+**渠道路由规则**（三个渠道都配置时）：
+
+1. SendFlare 键值对/JSON 命中发件人域名 → 走 SendFlare
+2. Resend 键值对/JSON 命中 → 走 Resend
+3. Cyberpersons 键值对/JSON 命中 → 走 Cyberpersons
+4. SendFlare 单密钥兜底 → 走 SendFlare
+5. Resend 单密钥兜底 → 走 Resend
+6. Cyberpersons 单密钥兜底 → 走 Cyberpersons
+7. 均未命中 → 报错「未找到域名对应的发件 API Key」
+
+注意：SendFlare 与 Cyberpersons 暂不支持发件查询、修改 scheduled_at、取消已调度
+邮件，相关接口对这两个渠道发出的邮件会返回 400「SendFlare / Cyberpersons 渠道
+暂不支持此操作」。
+</details>
+
+<details>
+<summary><strong>如何接入新的发件渠道</strong></summary>
+
+发件模块已抽象到 `src/email/providers/`，新增渠道通常不需要改动前端或业务路由。适配步骤请参考 [发件渠道适配文档](docs/provider-adapter.md)。
 </details>
 
 <details>
@@ -189,9 +211,35 @@ wrangler d1 execute TEMP_MAIL_DB --command "SELECT * FROM mailboxes LIMIT 10"
 - **R2/D1 费用**：有免费额度限制，建议定期清理过期邮件
 - **安全**：生产环境务必修改默认的 `ADMIN_PASSWORD` 和 `JWT_TOKEN`
 
+## 自动部署
+
+本项目支持 GitHub Actions 自动部署到 Cloudflare Workers。详细配置说明请参考 [自动部署指南](docs/action-deployment.md)。
+
+## 合作伙伴
+
+[![IPWO 住宅代理](pic/98170abe6955c352c69944323006b457.jpg)](https://www.ipwo.net/?ref=githubfreemail)
+
+[IPWO](https://www.ipwo.net/?ref=githubfreemail) 的住宅代理网络覆盖 195+ 地区、9000 万活跃住宅 IP，提供动态 / 静态 / 不限量三种形态，兼容 HTTP(S) 与 SOCKS5，可按国家、城市定位与会话配置。
+
+常用于邮件系统测试、API 请求验证、网页访问测试与自动化工作流。可免费测试，折扣码 `0200`。
+
+## 感谢贡献者
+
+感谢 [sarsanta](https://github.com/sarsanta) 贡献的 GitHub Actions 自动部署功能！
+
+感谢 [oxygen](https://github.com/daimiaopeng) 贡献的权限越权漏洞及其修复
+
+感谢 [herongcan](https://github.com/herongcan) 贡献的验证码误判修复（[#75](https://github.com/idinging/freemail/pull/75)）与已删邮箱残留状态修复（[#76](https://github.com/idinging/freemail/pull/76)）
+
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=idinging/freemail&type=Date)](https://www.star-history.com/#idinging/freemail&Date)
+<a href="https://www.star-history.com/?repos=idinging%2Ffreemail&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=idinging/freemail&type=date&theme=dark&legend=top-left&sealed_token=FzUojQuGdiAUQRRZmcDq3RJT2paNvsRPT5M7pH89byZxdeib7cQ7hmEC5IBnMRiXH26fjzGuZ6bEvpOTgT9kn-2FvpTTRj47r9y-kzpd0PyNRAKH-bSpqw" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=idinging/freemail&type=date&legend=top-left&sealed_token=FzUojQuGdiAUQRRZmcDq3RJT2paNvsRPT5M7pH89byZxdeib7cQ7hmEC5IBnMRiXH26fjzGuZ6bEvpOTgT9kn-2FvpTTRj47r9y-kzpd0PyNRAKH-bSpqw" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=idinging/freemail&type=date&legend=top-left&sealed_token=FzUojQuGdiAUQRRZmcDq3RJT2paNvsRPT5M7pH89byZxdeib7cQ7hmEC5IBnMRiXH26fjzGuZ6bEvpOTgT9kn-2FvpTTRj47r9y-kzpd0PyNRAKH-bSpqw" />
+ </picture>
+</a>
 
 ## 联系方式
 
